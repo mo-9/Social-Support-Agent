@@ -1,0 +1,12 @@
+﻿fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+qdrant-client
+pydantic-settings
+asyncpg
+python-dotenv
+celery
+redis
+langgraph
+langchain
