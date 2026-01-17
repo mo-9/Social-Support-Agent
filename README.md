@@ -1,136 +1,523 @@
-# 🏛️ Social Support AI Workflow Automation
+# 🏛️ Social Support Agent
 
-## 📋 Overview
-An intelligent, agentic AI solution designed to automate the social support application process for government entities. This system reduces processing time from days to minutes by leveraging **Multimodal GenAI (Llama3)**, **Machine Learning (Scikit-learn)**, and **RAG (Retrieval-Augmented Generation)** to analyze documents, assess risk, and ensure legal compliance.
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_AI-green.svg)](https://langchain-ai.github.io/langgraph/)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-purple.svg)](https://ollama.ai/)
+
+> **AI-Powered Social Support Application Workflow Automation**
+
+An intelligent multi-agent system designed to automate government social security department workflows, reducing application processing time from 5-20 working days to just minutes through GenAI-powered automation.
+
+**Author:** Mohamed Hammad
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 📋 Table of Contents
 
-The solution follows a **Microservices-based Architecture**:
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Solution Architecture](#-solution-architecture)
+- [Features](#-features)
+- [Technology Stack](#-technology-stack)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Project Structure](#-project-structure)
+- [API Documentation](#-api-documentation)
+- [Future Improvements](#-future-improvements)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-* **Orchestration:** LangGraph (Stateful Multi-Agent Workflow)
-* **LLM Serving:** Ollama (Llama3 - Local Privacy Focused)
-* **ML Engine:** Scikit-learn (Random Forest for Risk Scoring)
-* **Vector Database:** Qdrant (Legal Knowledge Base)
-* **OCR & Multimodal:** Tesseract & Pandas (PDF, Images, Excel, CSV)
-* **Backend API:** FastAPI
-* **Async Workers:** Celery + Redis
-* **Frontend:** Streamlit
+---
 
-### 🔄 System Data Flow
-```mermaid
-graph TD
-    User([User]) -->|Uploads Docs| UI[Streamlit UI]
-    UI -->|POST /submit| API[FastAPI Backend]
-    API -->|Push Task| Redis[(Redis Queue)]
-    Redis -->|Pull Task| Worker[Celery Worker]
-    
-    subgraph "AI Logic Layer (LangGraph)"
-        Worker --> OCR[OCR Engine]
-        OCR --> LLM[Llama3 Extraction]
-        LLM --> ML[Scikit-Learn Risk Model]
-        ML --> RAG[Qdrant Legal Search]
-        RAG --> Decision[Final Decision Agent]
-    end
-    
-    Decision -->|Save Result| DB[(PostgreSQL)]
-    UI -->|Poll Result| API
-    API -->|Fetch Status| DB
+## 🎯 Overview
 
+The Social Support Agent is an end-to-end AI solution that automates the assessment and approval process for social support applications. It leverages:
 
+- **Multimodal AI Processing** - Handles text, images, and tabular data
+- **Agentic AI Orchestration** - Multiple specialized agents working together
+- **Local LLM Hosting** - Privacy-focused with locally hosted models
+- **Interactive Chat Interface** - User-friendly Streamlit-based UI
 
+---
 
-🚀 Key Features
-Multimodal Ingestion: Processes Images, PDFs, and Excel/CSV financial sheets.
+## 🔍 Problem Statement
 
-Hybrid AI Reasoning: Combines GenAI (extraction/reasoning) with Traditional ML (probabilistic risk scoring).
+### Current Pain Points
 
-Legal Compliance (RAG): Cross-references applicant data against a vectorized legal knowledge base (Qdrant) to prevent fraud.
+| Pain Point | Description | Impact |
+|------------|-------------|--------|
+| **Manual Data Gathering** | Manual entry from scanned documents, physical collection from offices | Data entry errors, delays |
+| **Semi-Automated Validations** | Basic form validation with manual inconsistency checks | Significant manual effort |
+| **Inconsistent Information** | Discrepancies in addresses, income, family details | Verification bottlenecks |
+| **Time-Consuming Reviews** | Multiple review rounds across departments | 5-20 working days processing |
+| **Subjective Decision-Making** | Human bias in assessments | Inconsistent, unfair decisions |
 
-Economic Enablement: Suggests upskilling and job roles for rejected or low-income applicants.
+### Solution Goals
 
-Interactive UI: Real-time tracking of the application status via Streamlit.
+- ✅ **99% Automation** - Automated decision-making within minutes
+- ✅ **Multi-source Data Ingestion** - Bank statements, Emirates ID, resumes, assets/liabilities
+- ✅ **Eligibility Assessment** - Based on income, employment, family size, wealth
+- ✅ **Support Recommendations** - Financial support approval or soft decline
+- ✅ **Economic Enablement** - Upskilling, job matching, career counseling suggestions
 
-🛠️ Installation & Setup
-Prerequisites
-Python 3.10+
+---
 
-Docker Desktop (Running)
+## 🏗️ Solution Architecture
 
-Tesseract OCR (Installed on system)
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER INTERFACE                                  │
+│                         (Streamlit Web Application)                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           MASTER ORCHESTRATOR                                │
+│                    (LangGraph Agentic Orchestration)                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   ReAct     │  │  Reflexion  │  │    PaS      │  │   Custom    │        │
+│  │  Reasoning  │  │  Framework  │  │  Framework  │  │   Agents    │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+└─────────────────────────────────────────────────────────────────────────────┘
+          │                │                │                │
+          ▼                ▼                ▼                ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│    Data      │  │    Data      │  │  Eligibility │  │   Decision   │
+│  Extraction  │  │  Validation  │  │    Check     │  │Recommendation│
+│    Agent     │  │    Agent     │  │    Agent     │  │    Agent     │
+└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
+          │                │                │                │
+          └────────────────┴────────────────┴────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            DATA PIPELINE LAYER                               │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌─────────────┐  │
+│  │  PostgreSQL   │  │   MongoDB     │  │    Qdrant     │  │   Neo4j     │  │
+│  │  (Relational) │  │   (NoSQL)     │  │   (Vector)    │  │   (Graph)   │  │
+│  └───────────────┘  └───────────────┘  └───────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          AI/ML MODEL LAYER                                   │
+│  ┌───────────────────────────┐    ┌───────────────────────────────────┐    │
+│  │   Scikit-learn Models     │    │      Local LLM (Ollama)           │    │
+│  │   - Classification        │    │   - Text Generation               │    │
+│  │   - Eligibility Scoring   │    │   - Document Understanding        │    │
+│  └───────────────────────────┘    └───────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          OBSERVABILITY LAYER                                 │
+│                              (Langfuse)                                      │
+│         Tracing │ Metrics │ Logging │ Performance Monitoring                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-1. Clone & Setup Environment
-Bash
+### Data Flow
 
-git clone <your-repo-link>
-cd social-support-ai
+1. **User Interaction** → Applicant submits documents via Streamlit UI
+2. **Data Extraction** → Agent extracts information from all document types
+3. **Data Validation** → Agent validates and cross-references data
+4. **Eligibility Check** → ML models assess eligibility criteria
+5. **Decision Recommendation** → Final recommendation generated
+6. **Response** → User receives decision with explanations
+
+---
+
+## ✨ Features
+
+### Core Features
+
+| Feature | Description |
+|---------|-------------|
+| 📄 **Document Processing** | Extract data from bank statements, IDs, resumes, Excel files |
+| 🔍 **Multi-source Validation** | Cross-reference information across multiple documents |
+| 📊 **ML-based Assessment** | Scikit-learn models for eligibility scoring |
+| 🤖 **Conversational Interface** | Interactive chat with GenAI chatbot |
+| 📈 **Real-time Tracking** | Application status and processing visibility |
+
+### AI Agents
+
+| Agent | Responsibility |
+|-------|---------------|
+| **Master Orchestrator** | Coordinates all agents and manages workflow |
+| **Data Extraction Agent** | Extracts structured data from multimodal inputs |
+| **Data Validation Agent** | Validates data consistency and accuracy |
+| **Eligibility Check Agent** | Assesses eligibility based on defined criteria |
+| **Decision Recommendation Agent** | Generates final recommendations |
+
+---
+
+## 🛠️ Technology Stack
+
+### Programming & Framework
+
+| Category | Technology | Justification |
+|----------|------------|---------------|
+| **Language** | Python 3.10+ | Industry standard for AI/ML, extensive library ecosystem |
+| **Web Framework** | Streamlit | Rapid prototyping, built-in components for data apps |
+| **API Framework** | FastAPI | High-performance, async support, auto-documentation |
+
+### Data Pipeline
+
+| Database | Type | Use Case |
+|----------|------|----------|
+| **PostgreSQL** | Relational | Structured applicant data, transactions |
+| **MongoDB** | NoSQL | Unstructured documents, application forms |
+| **Qdrant** | Vector | Semantic search, document embeddings |
+| **Neo4j** | Graph | Relationship mapping, family connections |
+
+### AI/ML Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **ML Models** | Scikit-learn | Classification, eligibility scoring |
+| **LLM Hosting** | Ollama + OpenWebUI | Local model inference |
+| **Agent Orchestration** | LangGraph | Multi-agent workflow management |
+| **Reasoning Framework** | ReAct, Reflexion | Structured agent reasoning |
+| **Observability** | Langfuse | Tracing, monitoring, debugging |
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+- Python 3.10 or higher
+- Docker & Docker Compose
+- Git
+- 16GB+ RAM recommended
+
+### Step 1: Clone Repository
+
+```bash
+git clone https://github.com/mo-9/Social-Support-Agent.git
+cd Social-Support-Agent
+```
+
+### Step 2: Create Virtual Environment
+
+```bash
 python -m venv venv
 
-# Activate venv:
-# Windows:
-.\venv\Scripts\activate
-# Mac/Linux:
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
 source venv/bin/activate
+```
 
-# Install dependencies
+### Step 3: Install Dependencies
+
+```bash
 pip install -r requirements.txt
-2. Infrastructure Setup (Docker)
-Start PostgreSQL, Redis, and Qdrant services:
+```
 
-Bash
+### Step 4: Set Up Databases (Docker)
 
+```bash
 docker-compose up -d
-3. Initialize Models
-Train the Risk Assessment Model and Seed the Legal Knowledge Base:
+```
 
-Bash
+### Step 5: Install Ollama & Download Models
 
-python train_risk_model.py
-python seed_laws.py
-4. Run the System
-To run the full system, open 3 separate terminals and run the following commands in order (ensure venv is activated in all):
+```bash
+# Install Ollama (macOS/Linux)
+curl -fsSL https://ollama.ai/install.sh | sh
 
-Terminal 1: Backend API
+# Download required models
+ollama pull llama3.2
+ollama pull nomic-embed-text
+```
 
-Bash
+### Step 6: Configure Environment Variables
 
-uvicorn app.main:app --reload
-Terminal 2: AI Worker
+```bash
+cp .env.example .env
+# Edit .env with your configurations
+```
 
-Bash
+### Step 7: Initialize Databases
 
-celery -A app.core.celery_app worker --loglevel=info --pool=solo
-Terminal 3: Frontend UI
+```bash
+python scripts/init_databases.py
+```
 
-Bash
+### Step 8: Run the Application
 
-streamlit run ui.py
-🧠 AI Agent Workflow (LangGraph)
-The system uses a graph-based orchestration pattern:
+```bash
+streamlit run app/main.py
+```
 
-Node	Description
-OCR Node	Extracts raw text from uploaded files (Tesseract/Pandas).
-Extraction Node	Llama3 converts unstructured text into structured JSON.
-Risk Node	Random Forest model predicts fraud risk based on income & family size.
-RAG Node	Retrieves relevant legal articles from Qdrant based on applicant profile.
-Enablement Node	Generates career advice using GenAI.
-Decision Node	Final orchestrator synthesizes all data to output APPROVED, REJECTED, or SOFT_DECLINE.
+---
 
-التصدير إلى "جداول بيانات Google"
+## 🚀 Usage
 
-📂 Project Structure
-Plaintext
+### Starting the Application
 
-social-support-ai/
+```bash
+# Start all services
+docker-compose up -d
+
+# Run Streamlit app
+streamlit run app/main.py
+```
+
+### Application Workflow
+
+1. **Upload Documents**
+   - Bank Statement (PDF)
+   - Emirates ID (Image)
+   - Resume/CV (PDF)
+   - Assets/Liabilities (Excel)
+   - Credit Report (PDF)
+
+2. **Interactive Chat**
+   - Answer clarifying questions
+   - Provide additional information
+   - Track application progress
+
+3. **Receive Decision**
+   - Eligibility status
+   - Support recommendations
+   - Economic enablement suggestions
+
+### API Endpoints
+
+```bash
+# Health Check
+GET /api/health
+
+# Submit Application
+POST /api/applications
+
+# Get Application Status
+GET /api/applications/{application_id}
+
+# Chat Interaction
+POST /api/chat
+```
+
+---
+
+## 📁 Project Structure
+
+```
+Social-Support-Agent/
 ├── app/
-│   ├── agents/workflow.py    # Master Agent (LangGraph)
-│   ├── core/                 # Config, DB, Celery
-│   ├── services/             # ML Models, Vector Store
-│   ├── utils/ocr.py          # Multimodal Readers
-│   └── main.py               # API Endpoints
-├── data/uploads/             # Temp Storage
-├── seed_laws.py              # RAG Seeder
-├── train_risk_model.py       # ML Trainer
-├── ui.py                     # Streamlit App
-└── docker-compose.yml        # Infrastructure
+│   ├── main.py                 # Streamlit application entry
+│   ├── pages/
+│   │   ├── home.py             # Home page
+│   │   ├── application.py      # Application submission
+│   │   └── status.py           # Status tracking
+│   └── components/
+│       ├── chat.py             # Chat interface
+│       ├── upload.py           # Document upload
+│       └── dashboard.py        # Admin dashboard
+│
+├── agents/
+│   ├── orchestrator.py         # Master orchestrator agent
+│   ├── extraction_agent.py     # Data extraction agent
+│   ├── validation_agent.py     # Data validation agent
+│   ├── eligibility_agent.py    # Eligibility check agent
+│   └── decision_agent.py       # Decision recommendation agent
+│
+├── models/
+│   ├── ml/
+│   │   ├── classifier.py       # Eligibility classifier
+│   │   └── scorer.py           # Support scoring model
+│   └── schemas/
+│       ├── applicant.py        # Applicant data schema
+│       └── application.py      # Application schema
+│
+├── services/
+│   ├── document_processor.py   # Document processing service
+│   ├── database_service.py     # Database operations
+│   └── llm_service.py          # LLM interaction service
+│
+├── data/
+│   ├── raw/                    # Raw uploaded documents
+│   ├── processed/              # Processed data
+│   └── synthetic/              # Synthetic test data
+│
+├── config/
+│   ├── settings.py             # Application settings
+│   └── prompts/                # Agent prompts
+│
+├── scripts/
+│   ├── init_databases.py       # Database initialization
+│   └── generate_synthetic.py   # Synthetic data generation
+│
+├── tests/
+│   ├── unit/                   # Unit tests
+│   └── integration/            # Integration tests
+│
+├── docs/
+│   ├── architecture.md         # Architecture documentation
+│   ├── api.md                  # API documentation
+│   └── deployment.md           # Deployment guide
+│
+├── docker-compose.yml          # Docker services configuration
+├── Dockerfile                  # Application Dockerfile
+├── requirements.txt            # Python dependencies
+├── .env.example                # Environment variables template
+└── README.md                   # This file
+```
+
+---
+
+## 📚 API Documentation
+
+### Authentication
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+### Submit Application
+
+```http
+POST /api/applications
+Content-Type: multipart/form-data
+
+{
+  "applicant_name": "string",
+  "emirates_id": "file",
+  "bank_statement": "file",
+  "resume": "file",
+  "assets_liabilities": "file",
+  "credit_report": "file"
+}
+```
+
+### Response Schema
+
+```json
+{
+  "application_id": "uuid",
+  "status": "processing | approved | declined | pending_review",
+  "eligibility_score": 0.85,
+  "recommendations": {
+    "financial_support": {
+      "eligible": true,
+      "amount": 5000,
+      "duration": "6 months"
+    },
+    "economic_enablement": [
+      {
+        "type": "upskilling",
+        "program": "Digital Skills Training",
+        "provider": "Government Training Center"
+      }
+    ]
+  },
+  "reasoning": "string",
+  "created_at": "timestamp",
+  "processed_at": "timestamp"
+}
+```
+
+---
+
+## 🔮 Future Improvements
+
+### Short-term Enhancements
+
+- [ ] Multi-language support (Arabic, English)
+- [ ] SMS/Email notifications
+- [ ] Mobile-responsive UI
+- [ ] Batch application processing
+
+### Medium-term Enhancements
+
+- [ ] Integration with government e-services
+- [ ] Biometric verification
+- [ ] Appeal workflow automation
+- [ ] Advanced analytics dashboard
+
+### Long-term Vision
+
+- [ ] Federated learning for privacy-preserving model updates
+- [ ] Cross-department data sharing protocols
+- [ ] Predictive analytics for resource allocation
+- [ ] Citizen feedback integration
+
+### Integration Considerations
+
+```yaml
+# API Integration Points
+External Systems:
+  - Government ID Verification API
+  - Credit Bureau API
+  - Employment Records API
+  - Property Registry API
+
+Data Pipeline:
+  - ETL Jobs: Apache Airflow
+  - Real-time Streaming: Apache Kafka
+  - Data Lake: MinIO/S3
+
+Security:
+  - OAuth 2.0 / OpenID Connect
+  - End-to-end Encryption
+  - Audit Logging
+  - GDPR Compliance
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Code Standards
+
+- Follow PEP 8 style guide
+- Write docstrings for all functions
+- Include unit tests for new features
+- Update documentation as needed
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👤 Author
+
+**Mohamed Hammad**
+
+- GitHub: [@mo-9](https://github.com/mo-9)
+
+---
+
+## 🙏 Acknowledgments
+
+- LangChain/LangGraph for the agentic AI framework
+- Ollama for local LLM hosting
+- Streamlit for the rapid UI development
+- The open-source AI/ML community
+
+---
+
+<p align="center">
+  Made with ❤️ for Government Digital Transformation
+</p>
